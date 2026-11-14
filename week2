@@ -1,0 +1,187 @@
+PENETRATION TESTING REPORT
+FOOTPRINTING & NETWORK SCANNING PHASES
+W2-PM-FINAL | CYBERSECURITY | NETWORKWALKS
+
+Pentester Name
+(Cybersecurity Professional)	Tabuki Townsend
+Program/Batch	Cybersecurity Program 
+Date	14 August 2026
+Modules completed	W2-PM4 The Harvester 
+W2-PM5 (Zenmap Scanning)
+Client/Target	1. Networkwalks (secured written permission already)
+2. My own local LAN Network
+Permission secured from client?	Yes
+Phases covered	Phase 1: Reconnaissance & Footprinting
+Phase 2: Scanning & Network Discovery
+Phase 3-5: In Progress
+
+
+
+
+1. Liability Disclaimer
+All activities documented here were performed strictly on personal devices or systems with explicit written authorization. These materials are shared solely for educational and research purposes. Do not use this information to conduct unauthorized testing or engage in illegal activities. You are solely responsible for your actions neither the author, the instructor nor Networkwalks assumes liability for the misuse of this knowledge. In most jurisdictions, unauthorized system access is a criminal offense even if no damage occurs, and misuse can result in criminal prosecution, severe fines, termination of employment, and a permanent criminal record. 
+2. Introduction
+This report documents the security assessment activities completed during Week 2 of the Networkwalks Cybersecurity Internship Program. It covers two foundational phases of reconnaissance: footprinting the networkwalks.com domain using Kali Linux utilities (W2-PM1) and performing host discovery on a local network environment using Zenmap (W2-PM5).
+
+Together, these modules illustrate the initial reconnaissance stages of the cyber kill chain, demonstrating how an assessor transitions from gathering public intelligence to actively mapping live infrastructure on a target network. All commands and procedures were executed within controlled environments utilizing Kali Linux and a Windows workstation. To maintain rigorous documentation standards, each subsection within this report includes:
+
+•	The exact command or configuration parameter utilized.
+•	Observed tool output and system responses.
+•	Visual evidence via screenshots capturing execution and analysis.
+•	An attacker perspective note explaining the operational significance of the finding.
+
+3. Tools Used
+The table below lists each tool used in this report and its purpose.
+Tool	Purpose
+Kali Linux & Windows	Operating systems used for reconnaissance activities
+WHOIS	Find domain registration details (owner, dates, name servers).
+whatweb	Fingerprint web technologies (server, CMS, plugins, IP).
+nslookup	Resolve the domain name to its IP address using DNS.
+curl -I	Read the HTTP response headers of the website.
+wafw00f	Detect whether a Web Application Firewall protects the site.
+dnsrecon	Enumerate all DNS records (NS, MX, SPF, TXT, SRV).
+Zenmap (Nmap GUI)	Scan the local subnet to find live hosts, IPs and MAC addresses.
+Windows CMD	Local IP and MAC address identification
+
+
+
+
+4. Activities Performed
+
+4.1 Passive OSINT & Email Harvesting (theHarvester)
+•	Command Used:  theHarvester -d networkwalks.com -l 1000 -b baidu
+(Flags: -d specifies the target domain, -l 1000 limits the search to 1,000 results, and -b baidu selects Baidu as the OSINT data source.) 
+•	Observed Result: theHarvester (v4.11.1) queried Baidu for publicly indexed records associated with networkwalks.com and returned zero public artifacts: 
+o	IPs found: 0 
+o	Emails found: 0 
+o	People found: 0 
+o	Hosts/Subdomains found: 0 
+
+4.1 Footprinting & Reconnaissance
+
+Active and passive reconnaissance was conducted against networkwalks.com using six Kali Linux utilities to map the domain's registration details, underlying web technologies, hosting infrastructure, and perimeter defenses.
+•	WHOIS (Domain & Registration Intelligence)
+o	Findings: Queried public WHOIS records to retrieve domain registration metadata, registrar details, and authoritative name servers.
+o	Attacker Perspective: Reveals administrative details, registration timelines, and hosting providers, helping an adversary identify potential social engineering vectors or third-party infrastructure dependencies.
+
+
+
+
+•	WhatWeb (Web Technology Fingerprinting)
+o	Findings: Fingerprinted the web application stack, identifying WordPress 7.0.4 and the WP Download Manager 3.3.58 plugin, alongside server metadata.
+o	Attacker Perspective: Exposing exact CMS and plugin versions allows an attacker to cross-reference public vulnerability databases (such as CVE or WPScan) for known exploits targeting outdated or misconfigured components.
+
+•	NSLookup (DNS Resolution)
+o	Findings: Resolved networkwalks.com to its primary IPv4 hosting address
+o	Attacker Perspective: Translating a domain into an IP address pinpoints the target's network location, enabling an attacker to map ASN ownership, identify co-hosted domains, and prepare for targeted port scanning.
+
+•	cURL (HTTP Header Inspection)
+o	Findings: Executed curl -I to inspect raw HTTP response headers, confirming server configuration details and exposing the active WordPress REST API endpoint (/wp-json/).
+o	Attacker Perspective: Unauthenticated access to /wp-json/ can allow an adversary to enumerate valid WordPress usernames, installed routes, and site metadata without triggering invasive scanning alerts.
+
+•	WAFW00F (Web Application Firewall Detection)
+o	Findings: Probed the web server for perimeter filtering and confirmed the presence of ModSecurity (SpiderLabs).
+o	Attacker Perspective: Identifying the specific WAF vendor tells an attacker what rule sets are inspecting incoming traffic, guiding them to throttle scan speeds or craft encoding bypasses to avoid IP blacklisting.
+
+•	DNSRecon (DNS Zone & Record Enumeration)
+o	Findings: Enumerated the domain's DNS records, mapping authoritative name servers (NS), mail exchangers (MX), SPF/TXT policies, service records (SRV), and DNS server software details.
+o	Attacker Perspective: A complete DNS map exposes mail routing infrastructure, reveals email spoofing protections (or gaps in SPF/DMARC policies), and highlights internal or auxiliary services connected to the domain
+
+
+
+4.2 Network Scanning with Zenmap
+
+For the second activity, I used Zenmap to perform network discovery on my local network. The practical required me to identify my local IP address and subnet, discover live hosts, identify their IP and MAC addresses, and generate a network topology.
+I first used the Windows ipconfig command to identify my local IP address and LAN subnet. I then entered the subnet into Zenmap and selected Ping Scan to identify active hosts.
+The example results provided in the practical identified four live hosts:
+•	10.0.0.1
+•	10.0.0.4
+•	10.0.0.19
+•	10.0.0.5
+The example results also included four MAC addresses.
+After completing the scan, I opened the Topology section in Zenmap, enabled the legend and saved the network topology in PDF format as required by the practical task.
+Note: The actual subnet, number of hosts and addresses should be replaced with the results from my own network when submitting the report.
+
+ 
+5. Risk Analysis / Impact
+Based on the information collected during the footprinting and network scanning activities, I identified the following potential risks.
+#	Risk / Finding	Evidence / Observation	Potential Impact	Risk Level
+1	Web technology information exposed	WhatWeb identified WordPress and WP Download Manager	Attackers may use exposed technology/version information to identify software requiring further security review	● Medium
+2	Server IP address identifiable	Nslookup resolved the domain to 192.232.216.135	Provides information about the network location of the web service	● Low
+3	HTTP technical information exposed	Curl returned HTTP response headers and exposed /wp-json/	May assist technology fingerprinting and further enumeration	● Low
+4	WAF technology identifiable	Wafw00f identified ModSecurity (SpiderLabs)	Reveals information about the web application’s security architecture	● Low
+5	DNS infrastructure information exposed	DNSRecon identified DNS, mail and service-related records	DNS information can help build a broader infrastructure profile	● Medium
+6	Multiple live hosts visible on local network	Zenmap identified four live hosts in the example network	Unknown or unauthorized devices may potentially be present on a network	● Medium
+
+Risk level key:  ● Critical  ● Medium  ● Low
+The risks above are observations from the footprinting and scanning exercises, not confirmed vulnerabilities.
+The practical exercises primarily involved information gathering and host discovery. No exploitation or vulnerability validation was performed as part of these two modules.
+Therefore, the presence of information such as a software version, IP address or DNS record does not by itself mean that the system is vulnerable. Further authorized security testing would be required to confirm any actual vulnerability.
+
+
+
+
+
+
+6. Recommendations
+
+Based on the observations from these activities, I recommend the following security improvements:
+1.	Review publicly exposed technology information
+Organizations should regularly review what information about their web technologies, CMS and plugins is publicly visible.
+2.	Keep software updated
+CMS platforms, plugins, and other web technologies should be regularly updated and reviewed against current security advisories.
+3.	Review HTTP headers
+HTTP response headers should be reviewed to determine whether unnecessary technical information is being exposed.
+4.	Review DNS records regularly
+DNS records should be checked periodically to ensure that only required information and services are publicly exposed.
+5.	Properly configure and monitor the WAF
+Keep the WAF (ModSecurity) enabled and tuned, since it already blocks naive attacks.
+6.	Perform regular internal network discovery
+Organizations should periodically scan their own networks to identify active devices.
+7.	Investigate unknown devices
+Any unexpected device discovered during network scanning should be investigated and verified.
+8.	Maintain network documentation
+Network topology and device information should be documented and updated regularly.
+9.	Perform security testing with authorization
+Reconnaissance and scanning should only be performed against systems and networks where appropriate authorization has been provided.
+
+
+
+
+
+
+
+
+
+
+
+7. Conclusion
+
+The Week 2 assessment successfully demonstrated the transition from passive external reconnaissance to active local network mapping across the networkwalks.com domain and an isolated local subnet (10.0.0.0/24). During the external footprinting phase, combining multiple Kali Linux utilities revealed a detailed profile of networkwalks.com, identifying its primary IPv4 address, DNS architecture, underlying WordPress 7.0.4 stack, active /wp-json/ REST API endpoint, and perimeter protection via ModSecurity. In the subsequent local scanning phase, Zenmap host discovery (nmap -sn) accurately mapped live devices on the 10.0.0.0/24 network and generated a clear visual topology of active endpoints. 
+
+Overall, these exercises highlight two critical security takeaways:
+•	Layered Reconnaissance: No single tool provides a complete picture; correlating outputs across DNS, HTTP headers, WAF probes, and ICMP/ARP ping scans is essential to accurately map an attack surface.
+•	Defense-in-Depth & Authorization: Exposing verbose CMS versions and API endpoints lowers the barrier for targeted exploitation, underscoring the need to minimize public metadata alongside maintaining active WAF filtering. Above all, conducting these techniques strictly within authorized boundaries remains the foundational standard of ethical penetration testing.
+
+8. Evidence Collected
+   
+
+ 
+ 
+   
+ 
+
+
+ 
+
+
+-End-
+
+
+👤 Author
+Tabuki Townsend 
+Cybersecurity Professional B088
+LinkedIn: https://lnkd.in/p/eDqikrpz ________________________________________
+📌 Project Information
+Program Name: Cybersecurity program at Networkwalks | Week: 02 | Repository: GitHub
+
